@@ -16,10 +16,10 @@ The analysis helps bike-sharing providers to better understand the correaltion b
 
 ### Datasource1: Fahrrad-Dauerzählstellen Konstanz (Mobilithek)
 * Metadata URL: https://mobilithek.info/offers/-7161835583190029268
-* Data URL: https://offenedaten-konstanz.de/sites/default/files/Zaehlstelle_Herose_2021_stuendlich_Wetter.csv
+* Data URL: https://offenedaten-konstanz.de/sites/default/files/Zaehlstelle_Herose_2021_15min.csv
 * Data Type: CSV
 
-This dataset contains information of the amount of bicycles driving through a central point (Herose) in the german city Konstanz. The datasets contains data for every hour of every day of the year 2021. It is mentioned how many bicycles are driving in and outside the city for in one hour. 
+This dataset contains information of the amount of bicycles driving through a central point (Herose) in the german city Konstanz. The datasets contains data for every 15min of every day of the year 2021. It is mentioned how many bicycles are driving in and outside the city for in one hour. 
 
 ### Datasource2: Wetter Konstanz (Meteostat)
 * Metadata URL: https://meteostat.net/de/station/10929?t=2021-01-01/2021-12-31

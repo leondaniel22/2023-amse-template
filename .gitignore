@@ -1,0 +1,3 @@
+/.venv
+.dataset1.sqlite
+.dataset2.sqlite
