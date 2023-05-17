@@ -2,6 +2,8 @@ import pandas as pd
 import dateparser
 import sqlalchemy
 import os
+from meteostat import Point, Daily
+from datetime import datetime
 
 """ Data-pipeline for dataset 1 """
 
@@ -44,11 +46,26 @@ df1.to_sql('dataset1', 'sqlite:///data/dataset1.sqlite', if_exists='replace', in
 
 """ Load Data from source """
 
-script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-rel_path = "dataset2.csv"
-abs_file_path = os.path.join(script_dir, rel_path)
-df2 = pd.read_csv(abs_file_path, sep = ',') # link to directly download the dataset is not available
+"""Just for testing"""
+#script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
+#rel_path = "dataset2.csv"
+#abs_file_path = os.path.join(script_dir, rel_path)
+#df2 = pd.read_csv(abs_file_path, sep = ',') # link to directly download the dataset is not available
 
+# Use the metestat library to get data
+start = datetime(2021, 1, 1)
+end = datetime(2021, 12, 31)
+
+# Create Point for city of constance
+constance = Point(47.6833, 9.1833)
+
+# Get daily data for 2021
+data = Daily(constance, start, end)
+data = data.fetch()
+
+# put the data in a dataframe and reset the index
+df2 = pd.DataFrame(data)
+df2 = df2.reset_index()
 
 """ Transform Data so its fits """
 df2.columns.values[0] = 'Date' # column of date
@@ -65,7 +82,7 @@ df2.columns.values[10] = 'Duration of sunshine' # column of duration of sunshine
 
 # set date to datatype datetime 
 df2['Date'] = pd.to_datetime(df2['Date'])
-
+print(df2)
 
 """Data loading into a sqllite database"""
 
