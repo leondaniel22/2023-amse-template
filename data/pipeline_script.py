@@ -8,7 +8,7 @@ from datetime import datetime
 """ Data-pipeline for dataset 1 """
 
 
-""" Load Data from surce """
+""" Load Data from source """
 
 df1 = pd.read_csv( \
     'https://offenedaten-konstanz.de/sites/default/files/Zaehlstelle_Herose_2021_15min.csv', \
@@ -16,7 +16,7 @@ df1 = pd.read_csv( \
 )
 
 
-""" Transform Data so its fits """
+""" Transform Data so it fits """
 
 df1 = df1.dropna(axis=1, how='all') # drop all columns that only consits of not existing values 
 
