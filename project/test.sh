@@ -1,2 +1,3 @@
 #!/bin/sh  
-echo "Hello World"
+pytest ../data/test_pipeline.py
+
