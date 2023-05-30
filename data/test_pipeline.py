@@ -1,22 +1,58 @@
 import pytest
 import os
 import pandas as pd
-import sqlalchemy
-import pipeline_script
+import sqlite3
 
 
-def test_data_load():
-    """ Test if the data loading works and both datasets are an object of class pandas.DataFrame """
-    assert isinstance(pipeline_script.df1, pd.DataFrame)
-    assert isinstance(pipeline_script.df2, pd.DataFrame)
+def get_database_connection():
+    """ Helper function to connect to database """
+    directory_path = os.path.join(os.getcwd(), 'data/')
+    return sqlite3.connect(os.path.join(directory_path,"datasets.sqlite"))
 
-def test_dataframe_shape():
+def get_dataframe(cnx: sqlite3.Connection, table_name: str) -> pd.DataFrame:
+    """ Helper function to get dataframes from database tables """
+    return pd.read_sql_query("SELECT * FROM " + table_name, cnx)
+
+
+def test_database():
+    """ Test if after the execution of the pipeline, both datasets are safed in a sqlite database file in the data directory """
+    # get directory path
+    directory_path = os.path.join(os.getcwd(), 'data/')
+    # check if sqlite file exists
+    assert os.path.exists(os.path.join(directory_path,"datasets.sqlite"))
+
+
+def test_table():
+    """ Test if a table for dataset and dtaset 2 exists"""
+    # connect to database
+    cnx = get_database_connection()
+    # get cursor
+    c1 = cnx.cursor()
+    c2 = cnx.cursor()
+    # get the count of tables with the name dataset1 and dataset 2
+    c1.execute(" SELECT count(name) FROM sqlite_master WHERE type='table' AND name='dataset1'")
+    c2.execute(" SELECT count(name) FROM sqlite_master WHERE type='table' AND name='dataset2' ")
+    dataset1_exists = c1.fetchone()[0]==1 # if the count is 1, then table exists
+    dataset2_exists = c2.fetchone()[0]==1 # if the count is 1, then table exists
+    # check if tables dataset1 and dataset2 exist
+    assert dataset1_exists
+    assert dataset2_exists
+
+def test_shape():
     """ Test if the shapes of both dataframes are correct as expected"""
-    df1_expected_shape = (365, 4) # expected shape of the dataframe 1
-    df2_expected_shape = (365, 11) # expected shape of the dataframe 2
-    df1_actual_shape = pipeline_script.df1.shape # actual shape of the dataframe 1
-    df2_actual_shape = pipeline_script.df2.shape # actual shape of the dataframe 2
-    # check if the shape is correct
+
+    # connect to database and extract dataset 1 and dataset 2 as pandas dataframes
+    cnx = get_database_connection()
+    df1 = get_dataframe(cnx, "dataset1")
+    df2 = get_dataframe(cnx, "dataset2")
+
+    # define expected and actual shapes of dataset 1 and dataset2
+    df1_expected_shape = (365, 4)
+    df2_expected_shape = (365, 11) 
+    df1_actual_shape = df1.shape 
+    df2_actual_shape = df2.shape
+
+    # check if the actual shapes of the dataframes match the expected shapes
     assert len(df1_actual_shape) == 2
     assert len(df2_actual_shape) == 2 
     assert df1_expected_shape[0] == df1_actual_shape[0] 
@@ -24,35 +60,33 @@ def test_dataframe_shape():
     assert df2_expected_shape[0] == df2_expected_shape[0]
     assert df2_expected_shape[1] == df2_actual_shape[1]
 
-def test_dataframe_columns():
+def test_columns():
     """ Test if the columns of both dataframes are correct as expected """
-    df1_expected_columns = ['Date', 'Total bikers', 'Bikers inward', 'Bikers outward'] # expected columns of dataframe 1
+
+    # connect to database and extract dataset 1 and dataset 2 as pandas dataframes
+    cnx = get_database_connection()
+    df1 = get_dataframe(cnx, "dataset1")
+    df2 = get_dataframe(cnx, "dataset2")
+
+    # define expected and actual columns of dataset 1 and dataset2
+    df1_expected_columns = ['Date', 'Total bikers', 'Bikers inward', 'Bikers outward'] 
     df2_expected_columns = ['Date', 'Average temperature', 'Min. temperature', 'Max. temperature',
        'Total rainfall', 'Snow-level', 'Wind-direction', 'Wind-speed',
-       'Lace boe', 'Air pressure', 'Duration of sunshine'] # expected columns of dataframe 2
-    df1_actual_columns = pipeline_script.df1.columns # actual columns of dataframe 1
-    df2_actual_columns = pipeline_script.df2.columns # actual columns of dataframe 2
-    # check if the columns are correct
+       'Lace boe', 'Air pressure', 'Duration of sunshine'] 
+    df1_actual_columns = df1.columns 
+    df2_actual_columns = df2.columns 
+
+    # check if the actual columns of the dataframes match the expected columns
     assert len(df1_actual_columns) == len(df1_expected_columns)
     assert all([a == b for a, b in zip(df1_actual_columns, df1_expected_columns)])
     assert len(df2_actual_columns) == len(df2_expected_columns)
     assert all([a == b for a, b in zip(df2_actual_columns, df2_expected_columns)])
 
-def test_output_exists():
-    """ Test if after the execution of the pipeline, both datasets are safed in an sqlite database file in the data directory """
-    directory_path = os.path.join(os.getcwd(), 'data/') # get directory path
-    assert os.path.exists(os.path.join(directory_path,"dataset1.sqlite"))
-    assert os.path.exists(os.path.join(directory_path,"dataset2.sqlite"))
 
 def test_pipeline():
     """ Test if the pipeline script works as expected """
-    test_output_exists()
-    test_data_load()
-    test_dataframe_shape()
-    test_dataframe_columns()
-
-if __name__ == "__main__":
-    print("Start testing pipeline ...")
-    test_pipeline()
-    print("Test done!")
+    test_database()
+    test_table()
+    test_shape()
+    test_columns()
 

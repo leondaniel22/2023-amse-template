@@ -36,7 +36,7 @@ df1 = df1.groupby(df1['Date'], as_index=False).aggregate(agg_functions)
 
 """Data loading into a sqllite database"""
 
-df1.to_sql('dataset1', 'sqlite:///data/dataset1.sqlite', if_exists='replace', index=False)
+df1.to_sql('dataset1', 'sqlite:///data/datasets.sqlite', if_exists='replace', index=False)
 
 
 
@@ -82,8 +82,8 @@ df2.columns.values[10] = 'Duration of sunshine' # column of duration of sunshine
 
 # set date to datatype datetime 
 df2['Date'] = pd.to_datetime(df2['Date'])
-print(df2)
+
 
 """Data loading into a sqllite database"""
 
-df2.to_sql('dataset2', 'sqlite:///data/dataset2.sqlite', if_exists='replace', index=False)
+df2.to_sql('dataset2', 'sqlite:///data/datasets.sqlite', if_exists='replace', index=False)
