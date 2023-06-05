@@ -5,7 +5,7 @@ valuetype TrafficCode oftype text {
 }
 
 constraint TrafficCodeAllowList oftype AllowlistConstraint {
-    allowlist: ["FV", "RV", "DPN"];
+    allowlist: ["FV", "RV", "nur DPN"];
 }
 
 valuetype GeographicCoordinate oftype decimal {
