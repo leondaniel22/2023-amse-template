@@ -1,59 +1,71 @@
+// the valuetype Trafficode that allows only predifned text defined in TrafficCodeAllowlist
 valuetype TrafficCode oftype text {
     constraints: [
             TrafficCodeAllowList,
     ];
 }
 
+// the constraint TrafficCodeAllowlist that only allows the following strings "FV", "RV", "nur DPN"
 constraint TrafficCodeAllowList oftype AllowlistConstraint {
     allowlist: ["FV", "RV", "nur DPN"];
 }
 
+// the valuetype GeographicCoordinate that only allows decimals defined in GeographicCoordinateRange
 valuetype GeographicCoordinate oftype decimal {
     constraints: [
             GeographicCoordinateRange,
     ];
 }
 
+// the constraint GeographicCoordinateRange that only allows values between -90 and 90
 constraint GeographicCoordinateRange oftype RangeConstraint {
     lowerBound: -90;
     upperBound: 90;
 }
 
+// the caluetype IFOPT_Input that only allows text defined in IFOTP_Format
 valuetype IFOPT_Input oftype text {
     constraints: [
             IFOTP_Format,
     ];
 }
 
+// the constraint IFOTP_Format that only allows input that fullfills the following regex
 constraint IFOTP_Format oftype RegexConstraint {
     regex: /[a-z]{2}:\d+:\d+(:\d+)?(:\d+)?/;
 }
 
+/// the pipeline to extract a dataset about trainstops
 pipeline TrainstopsPipeline {
 
     TrainstopsExtractor
-        -> TrainstopsTextFileInterpreter
+        -> TrainstopsTextFileInterpreter 
         -> TrainstopsCSVInterpreter
         -> TrainstopsColumnDeleter
         -> TrainstopsTableInterpreter
         -> TrainstopsLoader;
 
+    // the extractor that gets the dataset from the website
     block TrainstopsExtractor oftype HttpExtractor {
         url: "https://download-data.deutschebahn.com/static/datasets/haltestellen/D_Bahnhof_2020_alle.CSV";
     }
 
+    // the interpreter that transferrs the dataset into a file
     block TrainstopsTextFileInterpreter oftype TextFileInterpreter {
 
     }
 
+    // the interpreter that transferrs the file into a sheet
     block TrainstopsCSVInterpreter oftype CSVInterpreter {
         delimiter: ";";
     }
 
+    // the component that deletes the column J (status)
     block TrainstopsColumnDeleter oftype ColumnDeleter {
         delete: [column J];
     }
 
+    // the interpreter that transfers the sheet into a table
     block TrainstopsTableInterpreter oftype TableInterpreter {
         header: true;
         columns: [
@@ -70,7 +82,7 @@ pipeline TrainstopsPipeline {
                 
     }
 
-
+    // the loader than stores the table into a sqlite database called "trainstops"
     block TrainstopsLoader oftype SQLiteLoader {
         table: "Trainstops";
         file: "./trainstops.sqlite";
