@@ -17,7 +17,7 @@ jobs:
     - name: Checkout pipeline feedback
       uses: actions/checkout@v3
       with:
-        repository: leondaniel22/amse-exercise-feedback
+        repository: leondaniel22/2023-amse-template
         path: project
 
     - name: Set up Node
