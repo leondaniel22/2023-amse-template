@@ -1,6 +1,6 @@
 #!/bin/sh  
 
-pip install -r .testing/project/requirements.txt
+pip install -r .testing/requirements.txt
 
 # execute the pipeline
 echo "Execute the pipeline ..."
