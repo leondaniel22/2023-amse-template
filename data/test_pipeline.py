@@ -5,7 +5,7 @@ import sqlite3
 
 
 def get_database_connection():
-    """ Helper function to connect to database """
+    """ Helper function to connect to the database """
     directory_path = os.path.join(os.getcwd(), 'data/')
     return sqlite3.connect(os.path.join(directory_path,"datasets.sqlite"))
 
