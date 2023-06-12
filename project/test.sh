@@ -1,6 +1,6 @@
 #!/bin/sh  
 
-pip3 install -r requirements.txt
+pip install -r requirements.txt
 
 # execute the pipeline
 echo "Execute the pipeline ..."
