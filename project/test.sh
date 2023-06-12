@@ -1,12 +1,12 @@
 #!/bin/sh  
 
-pip install -r requirements.txt
+pip install -r .testing/project/requirements.txt
 
 # execute the pipeline
 echo "Execute the pipeline ..."
-python data/pipeline_script.py
+python ./testing/data/pipeline_script.py
 
 # test if pipeline works correct
 echo "Test if pipeline works correctly ..."
-pytest ../data/test_pipeline.py
+pytest ./testing/data/test_pipeline.py
 
