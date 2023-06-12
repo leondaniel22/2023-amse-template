@@ -1,5 +1,7 @@
 #!/bin/sh  
 
+pip3 install -r requirements.txt
+
 # execute the pipeline
 echo "Execute the pipeline ..."
 python data/pipeline_script.py
