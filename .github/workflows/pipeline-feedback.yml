@@ -17,6 +17,7 @@ jobs:
     - name: Checkout pipeline feedback
       uses: actions/checkout@v3
       with:
+        repository: leondaniel22/amse-exercise-feedback
         path: project
 
     - name: Set up Node
@@ -33,4 +34,4 @@ jobs:
     # Run exercise feedback
     - name: Pipeline feedback
       run: |
-        ./project/test.sh
+        test.sh
