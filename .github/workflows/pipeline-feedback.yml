@@ -34,4 +34,4 @@ jobs:
     # Run exercise feedback
     - name: Pipeline feedback
       run: |
-        /test.sh
+        test.sh
