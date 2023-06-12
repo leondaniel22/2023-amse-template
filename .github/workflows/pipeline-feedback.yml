@@ -18,7 +18,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: leondaniel22/2023-amse-template
-        path: project
+        path: testing
 
     - name: Set up Node
       uses: actions/setup-node@v3
@@ -34,4 +34,4 @@ jobs:
     # Run exercise feedback
     - name: Pipeline feedback
       run: |
-        test.sh
+        ./testing/project/test.sh
