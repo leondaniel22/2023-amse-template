@@ -137,7 +137,7 @@ pipeline DataPipeline {
         from tempCelsius oftype Temperature;
         to tempFahrenheit oftype decimal;
 
-        tempFahrenheit: round((tempCelsius * 9.0/5.0) + 32.0);
+        tempFahrenheit: (tempCelsius * 9.0/5.0) + 32.0;
     }
 
     // the loader than stores the table into a sqlite database called "temperatures.sqlite"
