@@ -8,7 +8,7 @@ This projects analyzes the amount of daily bicyle drivers driving through a cent
 ## Rationale
 
 <!-- Outline the impact of the analysis, e.g. which pains it solves. -->
-The analysis helps bike-sharing providers to better understand the correaltion between weather and the amount of bicycles driving by the example of the german city Konstanz. Therefore, hopefully, a better management of providing bicyles can be achieved.  
+The analysis can be used to inform urban planning decisions, improve cycling infrastructure, and design targeted interventions to encourage cycling under specific weather conditions.
 
 ## Datasources
 
@@ -38,6 +38,9 @@ This dataset contains information of the daily weather information of the german
 4. Write data engineering script for storing data [#4] [i4]
 5. Create automated test for project [#5] [i5]
 6. Deploy the project on GitHub pages [#6] [i6]
+7. Create a data exploration report [#7] [i7]
+8. Improve data pipeline [#8] [i8]
+9. Finish final report [#9] [i9]
 
 [i1]: https://github.com/leondaniel22/2023-amse-template/issues/1
 [i2]: https://github.com/leondaniel22/2023-amse-template/issues/2
@@ -45,3 +48,6 @@ This dataset contains information of the daily weather information of the german
 [i4]: https://github.com/leondaniel22/2023-amse-template/issues/4
 [i5]: https://github.com/leondaniel22/2023-amse-template/issues/5
 [i6]: https://github.com/leondaniel22/2023-amse-template/issues/6
+[i7]: https://github.com/leondaniel22/2023-amse-template/issues/7
+[i8]: https://github.com/leondaniel22/2023-amse-template/issues/8
+[i9]: https://github.com/leondaniel22/2023-amse-template/issues/9
