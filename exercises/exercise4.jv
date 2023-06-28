@@ -1,5 +1,5 @@
 // the valuetype DeviceID that only allows decimals defined in DeviceIDRange
-valuetype DeviceID oftype decimal {
+valuetype DeviceID oftype integer {
     constraints: [
             DeviceIDRange,
     ];
@@ -33,8 +33,8 @@ valuetype Temperature oftype decimal {
 
 // the constraint TemperatureRange that only allows values between -50 and 50
 constraint TemperatureRange oftype RangeConstraint {
-    lowerBound: -50;
-    upperBound: 50;
+    lowerBound: -50.0;
+    upperBound: 50.0;
 }
 
 // the valuetype DeviceStatus that allows only predifned text defined in DeviceStatusAllowList
@@ -134,10 +134,10 @@ pipeline DataPipeline {
 
     // the transform operation that is calculating the Fahrenheit value of an input value in Celsius
     transform CelsiusToFahrenheit {
-        from tempCelsius oftype decimal;
+        from tempCelsius oftype Temperature;
         to tempFahrenheit oftype decimal;
 
-        tempFahrenheit: (tempCelsius *9/5) +32;
+        tempFahrenheit: (tempCelsius * 9/5) + 32;
     }
 
     // the loader than stores the table into a sqlite database called "temperatures.sqlite"
