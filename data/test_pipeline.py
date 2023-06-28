@@ -70,7 +70,7 @@ def test_columns():
 
     # define expected and actual columns of dataset 1 and dataset2
     df1_expected_columns = ['Date', 'Total bikers', 'Bikers inward', 'Bikers outward'] 
-    df2_expected_columns = ['Date', 'Average temperature', 'Min. temperature', 'Max. temperature',
+    df2_expected_columns = ['Date', 'Average temperature', 'Min temperature', 'Max temperature',
        'Total rainfall', 'Snow-level', 'Wind-direction', 'Wind-speed',
        'Lace boe', 'Air pressure', 'Duration of sunshine'] 
     df1_actual_columns = df1.columns 
