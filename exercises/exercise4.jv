@@ -12,7 +12,7 @@ constraint DeviceIDRange oftype RangeConstraint {
 
 
 // the valuetype Monat of type decimal that only allows decimals defined in MonatRange
-valuetype Monat oftype decimal {
+valuetype Monat oftype integer {
     constraints: [
             MonatRange,
     ];
