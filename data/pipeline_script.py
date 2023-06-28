@@ -1,89 +1,123 @@
 import pandas as pd 
 import dateparser
 import sqlalchemy
+from pandas import DataFrame
 import os
 from meteostat import Point, Daily
 from datetime import datetime
 
-""" Data-pipeline for dataset 1 """
+
+def read_csv():
+    """ This function reads a csv file and turns it into a pandas dataframe """
+
+    return pd.read_csv( \
+        'https://offenedaten-konstanz.de/sites/default/files/Zaehlstelle_Herose_2021_15min.csv', \
+        sep = ','
+    )
 
 
-""" Load Data from source """
+def read_from_meteostat():
+    """ This function reads a dataset about weather conditions in the german city Konstanz (2021) and turns it into a pandas dataframe """
 
-df1 = pd.read_csv( \
-    'https://offenedaten-konstanz.de/sites/default/files/Zaehlstelle_Herose_2021_15min.csv', \
-    sep = ','
-)
+    # Use the metestat library to get data
+    start = datetime(2021, 1, 1)
+    end = datetime(2021, 12, 31)
 
+    # Create Point for city of constance
+    constance = Point(47.6833, 9.1833)
 
-""" Transform Data so it fits """
+    # Get daily data for 2021
+    data = Daily(constance, start, end)
+    data = data.fetch()
 
-df1 = df1.dropna(axis=1, how='all') # drop all columns that only consits of not existing values 
+    # put the data in a dataframe and reset the index
+    df = pd.DataFrame(data)
+    df = df.reset_index()
 
-df1.columns.values[0] = 'Date' # column of date
-df1.columns.values[1] = 'Total bikers' # column of total amount of bikers driving on the bridge
-df1.columns.values[2] = 'Bikers inward' # column of bikers that are driving on the bridge towards the city
-df1.columns.values[3] = 'Bikers outward' # column of bikers that are driving on the bridge and are leaving the city
-
-# use a dateparser to change the time column date time to datetime and then normalize it so only the date remains 
-df1['Date'] = df1['Date'].apply(lambda x: dateparser.parse(x))
-df1['Date'] = df1['Date'].dt.normalize()
-
-# group all data of the the day  and aggregate the values of the other columns
-agg_functions = {'Total bikers': 'sum', 'Bikers inward': 'sum', 'Bikers outward': 'sum'}
-df1 = df1.groupby(df1['Date'], as_index=False).aggregate(agg_functions)
+    return df
 
 
-"""Data loading into a sqllite database"""
+def drop_none_rows(df: DataFrame):
+    """ This function drops all NaN rows of a pandas datframe """
 
-df1.to_sql('dataset1', 'sqlite:///data/datasets.sqlite', if_exists='replace', index=False)
+    return df.dropna(axis=1, how='all')
 
-
-
-
-""" Data-pipeline for dataset 2 """
-
-
-""" Load Data from source """
-
-"""Just for testing"""
-#script_dir = os.path.dirname(__file__) #<-- absolute dir the script is in
-#rel_path = "dataset2.csv"
-#abs_file_path = os.path.join(script_dir, rel_path)
-#df2 = pd.read_csv(abs_file_path, sep = ',') # link to directly download the dataset is not available
-
-# Use the metestat library to get data
-start = datetime(2021, 1, 1)
-end = datetime(2021, 12, 31)
-
-# Create Point for city of constance
-constance = Point(47.6833, 9.1833)
-
-# Get daily data for 2021
-data = Daily(constance, start, end)
-data = data.fetch()
-
-# put the data in a dataframe and reset the index
-df2 = pd.DataFrame(data)
-df2 = df2.reset_index()
-
-""" Transform Data so its fits """
-df2.columns.values[0] = 'Date' # column of date
-df2.columns.values[1] = 'Average temperature' # column of average temperature
-df2.columns.values[2] = 'Min. temperature' # column of minimal temperature
-df2.columns.values[3] = 'Max. temperature' # column of maximum temperature
-df2.columns.values[4] = 'Total rainfall' # column of total amount of rainfall
-df2.columns.values[5] = 'Snow-level' # column of snow level
-df2.columns.values[6] = 'Wind-direction' # column of wind direction
-df2.columns.values[7] = 'Wind-speed' # column of wind speed
-df2.columns.values[8] = 'Lace boe' # column of lace boe
-df2.columns.values[9] = 'Air pressure' # column of air pressure
-df2.columns.values[10] = 'Duration of sunshine' # column of duration of sunshine
-
-# set date to datatype datetime 
-df2['Date'] = pd.to_datetime(df2['Date'])
+def rename_columns(df: DataFrame, names: list[str]):
+    if len(df.columns.values) == len(names):
+        for i in range(len(names)):
+            df.columns.values[i] = names[i]
+    return df
 
 
-"""Data loading into a sqllite database"""
+def normalise_datetime(df: DataFrame):
+    """ This functions normalises the date format in a pandas dataframe """
+    # use a dateparser to change the time column date time to datetime and then normalize it so only the date remains 
+    df['Date'] = df['Date'].apply(lambda x: dateparser.parse(x))
+    df['Date'] = df['Date'].dt.normalize()
+    return df
 
-df2.to_sql('dataset2', 'sqlite:///data/datasets.sqlite', if_exists='replace', index=False)
+
+def aggregate_to_day(df: DataFrame):
+    """ This function groups a pandas dataframe with a 'Date' column by days """
+
+    # group all data of the the day and aggregate the values of the other columns
+    agg_functions = {'Total bikers': 'sum', 'Bikers inward': 'sum', 'Bikers outward': 'sum'}
+    df = df.groupby(df['Date'], as_index=False).aggregate(agg_functions)
+    return df
+
+    return dict(zip(meta_data, sql_dtypes))
+
+
+def get_dtypes(df: DataFrame): 
+    """ This function gets the correct corresponding sqlalchemy datatypes for each column """
+    dtypes = {}
+    for name in list(df):
+        if name == "Date":
+            dtypes[name] = sqlalchemy.DATE()
+        else: 
+            dtypes[name] = sqlalchemy.FLOAT()
+
+    return dtypes
+
+
+def save_in_db(df: DataFrame, db_name: str, table_name: str, dtype):
+    """ This function saves a dataframe into an sqlite database in the folder 'data' """
+    df.to_sql(table_name, 'sqlite:///data/' + db_name, if_exists='replace', index=False, dtype=dtype)
+
+
+def execute_pipeline():
+    """ This function executes the complete data pipeline for the following datasets:
+            1. Dataset1: Data about bikers in Konstanz
+            2. Dataset2: Data about weather conditions in Konstanz
+    """
+
+    # the name of the database to store the datasets
+    db_name = "datasets.sqlite"
+
+    # ---- Dataset1 ----
+    df1 = read_csv()
+    df1 = drop_none_rows(df1) 
+    df1_names = ["Date", "Total bikers", "Bikers inward", "Bikers outward"]
+    df1 = rename_columns(df1, names=df1_names)
+    df1 = normalise_datetime(df1)
+    df1 = aggregate_to_day(df1)
+    dtype = get_dtypes(df1)
+    save_in_db(df1, db_name=db_name, table_name="dataset1", dtype=dtype)
+
+    # ---- Dataset2 ----
+    df2 = read_from_meteostat()
+    df2_names = ["Date", "Average temperature", "Min temperature", "Max temperature", 
+                 "Total rainfall", "Snow-level", "Wind-direction", "Wind-speed", 
+                 "Lace boe", "Air pressure", "Duration of sunshine"]
+    df2 = rename_columns(df2, names=df2_names)
+    dtype = get_dtypes(df2)
+    save_in_db(df2, db_name=db_name, table_name="dataset2", dtype=dtype)
+
+execute_pipeline()
+
+
+
+
+
+
+
