@@ -1,0 +1,148 @@
+// the valuetype DeviceID that only allows decimals defined in DeviceIDRange
+valuetype DeviceID oftype decimal {
+    constraints: [
+            DeviceIDRange,
+    ];
+}
+
+// the constraint DeviceIDRange that only allows values greater than 0
+constraint DeviceIDRange oftype RangeConstraint {
+    lowerBound: 1;
+}
+
+
+// the valuetype Monat of type decimal that only allows decimals defined in MonatRange
+valuetype Monat oftype decimal {
+    constraints: [
+            MonatRange,
+    ];
+}
+
+// the constraint Monatrange that only allows values between 1 and 12
+constraint MonatRange oftype RangeConstraint {
+    lowerBound: 1;
+    upperBound: 12;
+}
+
+// the valuetype Temperature that only allows decimals defined in TemperatureRange
+valuetype Temperature oftype decimal {
+    constraints: [
+            TemperatureRange,
+    ];
+}
+
+// the constraint TemperatureRange that only allows values between -50 and 50
+constraint TemperatureRange oftype RangeConstraint {
+    lowerBound: -50;
+    upperBound: 50;
+}
+
+// the valuetype DeviceStatus that allows only predifned text defined in DeviceStatusAllowList
+valuetype DeviceStatus oftype text {
+    constraints: [
+            DeviceStatusAllowList,
+    ];
+}
+
+// the constraint DeviceStatusAllowList that only allows the following strings "Ja", "Nein"
+constraint DeviceStatusAllowList oftype AllowlistConstraint {
+    allowlist: ["Ja", "Nein"];
+}
+
+/// the pipeline to extract a dataset about temperatures of android devices
+pipeline DataPipeline {
+
+    DataExtractor
+        -> ZipArchiveInterpreter
+        -> DataFilePicker
+        -> DataTextFileInterpreter 
+        -> DataCSVInterpreter
+        -> TemperatureHeaderWriter
+        -> BatteryTemperatureHeaderWriter
+        -> DataTableInterpreter
+        -> TemperatureTransfomer
+        -> BatteryTemperatureTransfomer
+        -> DataLoader;
+
+
+    // the extractor that gets the dataset from the website
+	block DataExtractor oftype HttpExtractor {
+		url: "https://www.mowesta.com/data/measure/mowesta-dataset-20221107.zip";
+	}
+
+    // the archive interpreter the interprets the extracted file as a zip file
+	block ZipArchiveInterpreter oftype ArchiveInterpreter {
+		archiveType: "zip";
+	}
+
+    // the file picker that locates the desired file "data.csv" in the zip archive
+    block DataFilePicker oftype FilePicker {
+        path: "/data.csv";
+    }
+
+    // the interpreter that transferrs the dataset into a file
+    block DataTextFileInterpreter oftype TextFileInterpreter {
+
+    }
+
+    // the interpreter that transferrs the file into a sheet
+    block DataCSVInterpreter oftype CSVInterpreter {
+        delimiter: ";";
+    }
+
+    // the cell writer that changes the header name of column E1 (Temperatur)
+    block TemperatureHeaderWriter oftype CellWriter {
+        at: cell E1;
+        write: ["Temperatur"];
+       
+    }
+
+    // the cell writer that changes the header name of column M1 (Batterietemperatur)
+    block BatteryTemperatureHeaderWriter oftype CellWriter {
+        at: cell M1;
+        write: ["Batterietemperatur"];
+       
+    }
+
+    // the interpreter that transfers the sheet into a table
+    block DataTableInterpreter oftype TableInterpreter {
+        header: true;
+        columns: [
+            "Geraet" oftype DeviceID,
+            "Hersteller" oftype text,
+            "Model" oftype text,
+            "Monat" oftype Monat,
+            "Temperatur" oftype Temperature,
+            "Batterietemperatur" oftype Temperature,	
+            "Geraet aktiv" oftype DeviceStatus,
+        ];      
+    }
+
+    // the transformer that changes every value of column Temperatur to a decimal value in Fahrenheit inplace
+    block TemperatureTransfomer oftype TableTransformer {
+        inputColumn: 'Temperatur';
+        outputColumn: 'Temperatur';
+        use: CelsiusToFahrenheit;
+    }
+
+    // the transformer that changes every value of column Batterietemperatur to a decimal value in Fahrenheit inplace
+    block BatteryTemperatureTransfomer oftype TableTransformer {
+        inputColumn: 'Batterietemperatur';
+        outputColumn: 'Batterietemperatur';
+        use: CelsiusToFahrenheit;
+    }
+
+    // the transform operation that is calculating the Fahrenheit value of an input value in Celsius
+    transform CelsiusToFahrenheit {
+        from tempCelsius oftype decimal;
+        to tempFahrenheit oftype decimal;
+
+        tempFahrenheit: (tempCelsius *9/5) +32;
+    }
+
+    // the loader than stores the table into a sqlite database called "temperatures.sqlite"
+    block DataLoader oftype SQLiteLoader {
+        table: "temperatures";
+        file: "./temperatures.sqlite";
+    }
+}
