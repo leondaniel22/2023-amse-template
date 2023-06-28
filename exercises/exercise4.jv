@@ -112,7 +112,7 @@ pipeline DataPipeline {
             "Hersteller" oftype text,
             "Model" oftype text,
             "Monat" oftype Monat,
-            "Temperatur" oftype Temperature,
+            "Temperatur" oftype decimal,
             "Batterietemperatur" oftype Temperature,	
             "Geraet aktiv" oftype DeviceStatus,
         ];      
