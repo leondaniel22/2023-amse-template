@@ -134,7 +134,7 @@ pipeline DataPipeline {
 
     // the transform operation that is calculating the Fahrenheit value of an input value in Celsius
     transform CelsiusToFahrenheit {
-        from tempCelsius oftype Temperature;
+        from tempCelsius oftype decimal;
         to tempFahrenheit oftype decimal;
 
         tempFahrenheit: (tempCelsius * 9.0/5.0) + 32.0;
