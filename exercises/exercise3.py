@@ -58,6 +58,7 @@ def execute_pipeline(source: str, name: str):
     db_name = name + '.sqlite'
     table_name = name
     d_types = get_dtypes(df)
+    print(df)
     save_in_db(df, db_name, table_name, d_types)
 
 
